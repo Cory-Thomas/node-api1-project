@@ -25,7 +25,11 @@ server.get('/users', (req, res) => {
 });
 
 server.get('/users/:id', (req, res) => {
-    res.status(200).json({ data: users});
+    const id = Number(req.params.id);
+
+    const found = users.filter(l => l.id === id);
+
+    res.status(200).json({ found });
 });
 
 server.post('/users', (req, res) => {
