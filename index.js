@@ -4,7 +4,7 @@ const server = express();
 server.use(express.json());
 
 server.get('/', (req, res) => {
-    res.status(200).json({ hello: "nodeggfs"});
+    res.status(200).json({ hello: "server is working... Hello World!"});
 });
 
 let users = [
@@ -29,18 +29,29 @@ server.get('/users/:id', (req, res) => {
 
     const found = users.filter(l => l.id === id);
 
-    res.status(200).json({ found });
+    if ( found ){
+        res.status(200).json({found})            
+    } else {
+        res.status(400).json({errorMessage: 'The user with the specified ID does not exist'})
+    }
 });
 
 server.post('/users', (req, res) => {
     const data = req.body;
+    const { name, bio } = data;
 
-    users.push({
-        id: Date.now() + Math.random(), 
-        ...data
-    });
+    if (!name || !bio) {
+        res.status(400).json({ errorMessage: "Please provide name and bio for the user" });
+    } else if (name && bio) {
+        users.push({
+            id: Date.now() + Math.random(), 
+            ...data
+        });
 
-    res.status(201).json({ data, users });
+        res.status(201).json({ data, users });
+    } else {
+        res.status(500).json({ errorMessage: "There was an error while saving the user to the database" });
+    }
 });
 
 server.put('/users/:id', (req, res) => {
@@ -52,15 +63,19 @@ server.put('/users/:id', (req, res) => {
         Object.assign(found, changes);
         res.status(200).json({ data: users });
     } else {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({ message: "The user with the specified ID does not exist." });
     }
 });
 
 server.delete('/users/:id', (req, res) => {
     const id = Number(req.params.id);
-    users = users.filter(l => l.id !== id);
 
-    res.status(200).json({ data: users });
+    users = users.filter(l => l.id !== id);
+    if (id) {
+        res.status(200).json({ data: users });
+    } else {
+        res.status(404).json({ message: "User not found" });
+    }
 });
 
 const port = 5000;
